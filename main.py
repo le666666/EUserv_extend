@@ -51,7 +51,7 @@ def get_servers(sess_id, session) -> {}:
         server_id = tr.select('.td-z1-sp1-kc')
         if not len(server_id) == 1:
             continue
-        flag = True if tr.select('.kc2_order_action_container .kc2_order_extend_contract_term_container')[
+        flag = True if tr.select('.td-z1-sp2-kc .kc2_order_action_container')[
                            0].get_text().find('Contract extension possible from') == -1 else False
         d[server_id[0].get_text()] = flag
     return d
@@ -98,9 +98,9 @@ def renew(sess_id, session, password, order_id) -> bool:
 
 def check(sess_id, session):
     print("Checking.......")
-    get_servers(sess_id, session)
+    d = get_servers(sess_id, session)
     flag = True
-    for key, val in SERVERS.items():
+    for key, val in d.items():
         if val:
             flag = False
             print("ServerID: %s Renew Failed!" % key)
@@ -112,8 +112,8 @@ if __name__ == "__main__":
     if not USERNAME or not PASSWORD:
         print("你没有添加任何账户")
         exit(1)
-    user_list = USERNAME.split(',')
-    passwd_list = PASSWORD.split(',')
+    user_list = USERNAME.strip().split()
+    passwd_list = PASSWORD.strip().split()
     if len(user_list) != len(passwd_list):
         print("The number of usernames and passwords do not match!")
         exit(1)
@@ -130,6 +130,8 @@ if __name__ == "__main__":
             if v:
                 if not renew(sessid, s, passwd_list[i], k):
                     print("ServerID: %s Renew Error!" % k)
+                else:
+                    print("ServerID: %s has been successfully renewed!" % k)
             else:
                 print("ServerID: %s does not need to be renewed" % k)
         time.sleep(15)
